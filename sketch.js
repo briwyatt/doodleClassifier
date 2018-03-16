@@ -78,8 +78,8 @@ function setup() {
             inputs[j] = data[j] / 255.0;
         }
         let label = training[i].label;
-        let targets = [0, 0, 0];
-        targets[label] = 1;
+        let targets = [0, 0, 0]; 
+        targets[label] = 1; // one-hot encoding
         // console.log(inputs);
         // console.log(targets);
 
