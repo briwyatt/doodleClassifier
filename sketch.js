@@ -3,6 +3,11 @@
 const len = 784;
 const total_data = 1000;
 
+// map each category to a number 
+const CAT = 0;
+const RAINBOW = 1;
+const TRAIN = 2;
+
 let cats_data;
 let trains_data;
 let rainbows_data;
@@ -11,16 +16,14 @@ let cats = {};
 let trains = {};
 let rainbows = {};
 
-
-
-// p5 version 0.65 (?)
+let nn;
 
 // TODO: add a convolutional layer 
 // Uint8Array(784000) type of array that can only store integers
 
 
 // divide data into training and testing sets
-function prepareData(category, data){
+function prepareData(category, data, label){
     category.training = [];
     category.testing = [];
     for (let i = 0; i < total_data; i++) {
@@ -28,12 +31,13 @@ function prepareData(category, data){
         let threshold = floor(0.8 * total_data);
         if(i < threshold){
             category.training[i] = data.bytes.subarray(offset, offset + len);
+            category.training[i].label = label;
         } else {
             category.testing[i - threshold] = data.bytes.subarray(offset, offset + len);
+            category.testing[i - threshold].label = label;
         }
     }
 }
-
 
 
 function preload(){
@@ -46,12 +50,48 @@ function preload(){
 function setup() {
     createCanvas(280, 280);
     background(0);
-    prepareData(cats, cats_data);
-    prepareData(trains, trains_data);
-    prepareData(rainbows, rainbows_data);
+
+    // Preparing the data 
+    prepareData(cats, cats_data, CAT);
+    prepareData(trains, trains_data, TRAIN);
+    prepareData(rainbows, rainbows_data, RAINBOW);
+
+// Create the neural network
+    nn = new NeuralNetwork(784, 64, 3);
+
+
+//  train NN with all training data shuffled in random order
+    let training = [];
+    
+    training = training.concat(cats.training);
+    training = training.concat(trains.training);
+    training = training.concat(rainbows.training);
+    shuffle(training, true);
+    // console.log("training", training);
+
+//  Train for one epoch (over all 2,400 elements)
+ for (let i = 0; i < training.length; i++) {
+    // for (let i = 0; i < 1; i++){
+        let inputs = [];
+        let data = training[i];
+        for (let j = 0; j < data.length; j++){
+            inputs[j] = data[j] / 255.0;
+        }
+        let label = training[i].label;
+        let targets = [0, 0, 0];
+        targets[label] = 1;
+        // console.log(inputs);
+        // console.log(targets);
+
+
+        // takes input data and return some outputs,
+        // random went starts 
+        nn.train(inputs, targets);
+    }
+
+    console.log("trained for one epoch");
 
     let total = 100;
-    // each image
     for(let n = 0; n < total; n++){
         let img = createImage(28, 28);
         img.loadPixels();
@@ -74,10 +114,6 @@ function setup() {
     }
 
 }
-
-
-
-
 
 
 
