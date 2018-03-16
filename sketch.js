@@ -40,6 +40,48 @@ function prepareData(category, data, label){
 }
 
 
+//  Train for one epoch (over all 2,400 elements)
+function trainEpoch(training){
+    shuffle(training, true);
+
+    for (let i = 0; i < training.length; i++) {
+            let data = training[i];
+            let inputs = data.map(x => x / 255);
+           
+            let label = training[i].label;
+            let targets = [0, 0, 0]; 
+            targets[label] = 1; // one-hot encoding
+            // console.log(inputs);
+            // console.log(targets);
+
+            // takes input data and return some outputs, (is random when it first starts)
+            nn.train(inputs, targets);
+        }
+}
+
+function testAll(testing){
+    let correct = 0;
+    shuffle(testing, true);
+    for (let i = 0; i < testing.length; i++) {
+            let data = testing[i];
+            let inputs = data.map(x => x / 255);
+            let label = testing[i].label;
+            let guess = nn.predict(inputs);
+
+            // argmax function will give you an index to the max value in an array
+            let m = max(guess);
+            let classification = guess.indexOf(m);
+            // console.log("guess", guess);
+            // console.log("classification", classification);
+            // console.log("target label", label);
+            if (classification === label) {
+                correct++;
+            }
+        }
+        let percent = correct / testing.length;
+        return percent;
+}
+
 function preload(){
     cats_data = loadBytes('data/cats1000.bin');
     trains_data = loadBytes('data/trains1000.bin');
@@ -66,30 +108,24 @@ function setup() {
     training = training.concat(cats.training);
     training = training.concat(trains.training);
     training = training.concat(rainbows.training);
-    shuffle(training, true);
-    // console.log("training", training);
 
-//  Train for one epoch (over all 2,400 elements)
- for (let i = 0; i < training.length; i++) {
-    // for (let i = 0; i < 1; i++){
-        let inputs = [];
-        let data = training[i];
-        for (let j = 0; j < data.length; j++){
-            inputs[j] = data[j] / 255.0;
-        }
-        let label = training[i].label;
-        let targets = [0, 0, 0]; 
-        targets[label] = 1; // one-hot encoding
-        // console.log(inputs);
-        // console.log(targets);
+// prep all testing data
+    let testing = [];
+    testing = testing.concat(cats.testing);
+    testing = testing.concat(trains.testing);
+    testing = testing.concat(rainbows.testing);
 
+ 
+    let percent = testAll(testing);
+    console.log("% correct without training: ", + percent);
 
-        // takes input data and return some outputs,
-        // random went starts 
-        nn.train(inputs, targets);
-    }
+    trainEpoch(training);
+    let percentt = testAll(testing);
+    console.log("% correct after training 1 epoch: ", + percentt);
 
-    console.log("trained for one epoch");
+// i can evaluate how its going to do with the testing data
+//  without actually training it -- the % accurate out of pure randomness should be 1/3rd
+ testAll(testing);
 
     let total = 100;
     for(let n = 0; n < total; n++){
@@ -116,7 +152,19 @@ function setup() {
 }
 
 
+// using javascript in the browser 
+// training a neural network to recognize doodles of cats, trains, & rainbows
 
+
+
+// TODO: I want to use testing data to see how accurately it is able to guess
+//  before and after training
+
+
+
+//  TODO: implement softmax as the method I use as an activation function 
+//  that takes the output and transforms it into probability values that all equal = 100%
+ 
 
 
 
