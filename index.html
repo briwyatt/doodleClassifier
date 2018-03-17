@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta name="viewport" width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0>
-    <style> body {padding: 10px; margin: 10px;} </style>
+    <style> body {padding: 10px; margin: 10px; background-color: #AAA;} button { font-size: 24px; margin:10px; } </style>
     <script src="./libraries/nn.js"></script>
     <script src="./libraries/matrix.js"></script>
     <script src="./libraries/p5.min.js"></script>
@@ -10,8 +10,14 @@
     <script src="./libraries/addons/p5.sound.min.js"></script>
     <script src="sketch.js"></script>
     <script src="loadBinary.js"></script>
+    <script src="traintest.js"></script>
+    <script src="dataprep.js"></script>
   </head>
   <body>
+    <button id="train">train</button>
+    <button id="test">test</button>
+    <button id="guess">guess</button>
+    <button id="clear">clear</button>
 
   </body>
 </html>
